@@ -39,13 +39,13 @@ function fetchPage(url) {
                 const priceFraction = thisCard.find('a-price-fraction').text().ParseInt();
                 const price = priceWhole + priceFraction / 100;
                 const currentDate = new Date().toLocaleDateString();
-                let card = {
+                let newCard = {
                     name: name,
                     price: price,
                     url: itemUrl,
                     currentDate: currentDate
                 };
-                cards.push(card);
+                cards.push(newCard);
             });
         }
         catch (error) {
