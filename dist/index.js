@@ -18,7 +18,7 @@ const fs = require('fs');
 //     id: number;
 //     price: number;
 // }
-let cards = [];
+const cards = [];
 // const cardlist: CardList[] = [];
 // let AUrl: string = (new URL(document.location)).searchParams;
 function fetchPage(url) {
@@ -30,14 +30,14 @@ function fetchPage(url) {
             const $ = cheerio.load(html);
             //this string in the query selector seems to cover each item
             //querySelect EVERYTHHING
-            $("s-result-item s-asin sg-col-0-of-12 sg-col-16-of-20 sg-col s-widget-spacing-small sg-col-12-of-16").each((element) => {
-                const thisCard = $(element);
+            $('div.s-result-item.s-asin.sg-col-0-of-12.sg-col-16-of-20.sg-col.s-widget-spacing-small.sg-col-12-of-16').each((_idx, el) => {
+                const card = $(el);
                 //find everything
-                const name = thisCard.find('a-size-medium a-color-base a-text-normal').text();
-                const itemUrl = thisCard.find('a-link-normal s-underline-text s-underline-link-text s-link-style a-text-normal').text();
-                const priceWhole = thisCard.find('a-price-whole').text().ParseInt();
-                const priceFraction = thisCard.find('a-price-fraction').text().ParseInt();
-                const price = priceWhole + priceFraction / 100;
+                const name = card.find('span.a-size-base-plus.a-color-base.a-text-normal').text();
+                const itemUrl = card.find('a.a-link-normal.a-text-normal').attr('href');
+                // const priceWhole = card.find('a-price-whole').text();
+                // const priceFraction = card.find('a-price-fraction').text();
+                const price = card.find('span.a-price > span.a-offscreen').text();
                 const currentDate = new Date().toLocaleDateString();
                 let newCard = {
                     name: name,
@@ -47,6 +47,7 @@ function fetchPage(url) {
                 };
                 cards.push(newCard);
             });
+            return cards;
         }
         catch (error) {
             throw error;
@@ -54,8 +55,11 @@ function fetchPage(url) {
     });
 }
 // //might have to change data type here
-// function filterCards(data: Array<Card>) {
-// }
+function filterCards() {
+    for (var i = 0; i < cards.length; i++) {
+        console.log(cards[i].url.includes('3060' || '3070' || '3080'));
+    }
+}
 // //cant find the right data type for 'err', gonna use a node package
 function printCards() {
     let csv = cards.map(element => {
@@ -115,6 +119,9 @@ function printCards() {
         page.locator('[aria-label="Search"]').press('Enter')
     ]);
     fetchPage('https://www.amazon.com/s?k=nvidia+3080&crid=1I9LS6LL4GIYM&sprefix=nvidia+3080%2Caps%2C61&ref=nb_sb_noss');
+    // .then(cards => 
+    //   console.log(cards)
+    // );
     // ---------------------
     yield context.close();
     yield browser.close();
@@ -132,5 +139,6 @@ function printCards() {
     //     };
     //     const csvExporter = new ExportToCsv(options);
     //     csvExporter.generateCsv(cards);
+    filterCards();
     printCards();
 }))();

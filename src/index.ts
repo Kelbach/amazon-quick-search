@@ -17,51 +17,49 @@ interface Card {
 //     price: number;
 // }
 
-let cards: Card[] = [];
+const cards: Card[] = [];  
 
 // const cardlist: CardList[] = [];
 // let AUrl: string = (new URL(document.location)).searchParams;
 
 async function fetchPage(url: string) {
-    //cheerio boilerplate that I found
-    try {
-        const response = await axios.get(url);
-        const html = response.data;
-        const $ = cheerio.load(html);
-          
-        //this string in the query selector seems to cover each item
-        //querySelect EVERYTHHING
-        $("s-result-item s-asin sg-col-0-of-12 sg-col-16-of-20 sg-col s-widget-spacing-small sg-col-12-of-16").each((element:DataTransferItem) => {
-            const thisCard = $(element)
-
-            //find everything
-            const name = thisCard.find('a-size-medium a-color-base a-text-normal').text()
-            const itemUrl = thisCard.find('a-link-normal s-underline-text s-underline-link-text s-link-style a-text-normal').text()
-            const priceWhole = thisCard.find('a-price-whole').text().ParseInt();
-            const priceFraction = thisCard.find('a-price-fraction').text().ParseInt();
-            const price = priceWhole + priceFraction/100;
-            const currentDate = new Date().toLocaleDateString();
-
-            let newCard: Card = {
-                name: name,
-                price: price,
-                url: itemUrl,
-                currentDate: currentDate
-            }
-
-            cards.push(newCard)
-        });
-
-    } catch (error) {
-        throw error;
-    }
-    
+  //cheerio boilerplate that I found
+  try {
+      const response = await axios.get(url);
+      const html = response.data;
+      const $ = cheerio.load(html);
+      
+      //this string in the query selector seems to cover each item
+      //querySelect EVERYTHHING
+      $('div.s-result-item.s-asin.sg-col-0-of-12.sg-col-16-of-20.sg-col.s-widget-spacing-small.sg-col-12-of-16').each((_idx:any, el:any) => {
+          const card = $(el);
+          //find everything
+          const name = card.find('span.a-size-base-plus.a-color-base.a-text-normal').text();
+          const itemUrl = card.find('a.a-link-normal.a-text-normal').attr('href');
+          // const priceWhole = card.find('a-price-whole').text();
+          // const priceFraction = card.find('a-price-fraction').text();
+          const price = card.find('span.a-price > span.a-offscreen').text();
+          const currentDate = new Date().toLocaleDateString();
+          let newCard: Card = {
+              name: name,
+              price: price,
+              url: itemUrl,
+              currentDate: currentDate
+          };
+          cards.push(newCard);
+      });
+      return cards;
+  } catch (error) {
+      throw error;
+  }
 }
 
 // //might have to change data type here
-// function filterCards(data: Array<Card>) {
-
-// }
+function filterCards() {
+  for (var i = 0; i < cards.length; i++){
+      console.log(cards[i].url.includes('3060'||'3070'||'3080'))
+  }
+}
 
 // //cant find the right data type for 'err', gonna use a node package
 function printCards() {
@@ -117,7 +115,8 @@ function printCards() {
   ]);
 
 
-    fetchPage('https://www.amazon.com/s?k=nvidia+3060&crid=2WB9L4PJER3CU&sprefix=nvidia+3060%2Caps%2C66&ref=nb_sb_noss_1');
+    fetchPage('https://www.amazon.com/s?k=nvidia+3060&crid=2WB9L4PJER3CU&sprefix=nvidia+3060%2Caps%2C66&ref=nb_sb_noss_1')
+    
 
   // Click [aria-label="Search"]
   await page.locator('[aria-label="Search"]').click();
@@ -145,7 +144,10 @@ function printCards() {
     page.locator('[aria-label="Search"]').press('Enter')
   ]);
 
-    fetchPage('https://www.amazon.com/s?k=nvidia+3080&crid=1I9LS6LL4GIYM&sprefix=nvidia+3080%2Caps%2C61&ref=nb_sb_noss');
+    fetchPage('https://www.amazon.com/s?k=nvidia+3080&crid=1I9LS6LL4GIYM&sprefix=nvidia+3080%2Caps%2C61&ref=nb_sb_noss')
+    // .then(cards => 
+    //   console.log(cards)
+    // );
 
   // ---------------------
   await context.close();
@@ -168,6 +170,6 @@ function printCards() {
 //     const csvExporter = new ExportToCsv(options);
     
 //     csvExporter.generateCsv(cards);
-
+    filterCards();
     printCards();
 })();
