@@ -22,9 +22,11 @@ const cards: Card[] = [];
 // const cardlist: CardList[] = [];
 // let AUrl: string = (new URL(document.location)).searchParams;
 
-async function fetchPage(url: string) {
+async function fetchPage(searched:string, url: string) {
   //cheerio boilerplate that I found
   try {
+      let temp = <Card[]>[];
+
       const response = await axios.get(url);
       const html = response.data;
       const $ = cheerio.load(html);
@@ -32,22 +34,37 @@ async function fetchPage(url: string) {
       //this string in the query selector seems to cover each item
       //querySelect EVERYTHHING
       $('div.s-result-item.s-asin.sg-col-0-of-12.sg-col-16-of-20.sg-col.s-widget-spacing-small.sg-col-12-of-16').each((_idx:any, el:any) => {
-          const card = $(el);
-          //find everything
-          const name = card.find('span.a-size-base-plus.a-color-base.a-text-normal').text();
-          const itemUrl = card.find('a.a-link-normal.a-text-normal').attr('href');
-          // const priceWhole = card.find('a-price-whole').text();
-          // const priceFraction = card.find('a-price-fraction').text();
-          const price = card.find('span.a-price > span.a-offscreen').text();
-          const currentDate = new Date().toLocaleDateString();
+        const card = $(el);
+        //find everything
+        const name = card.find('span.a-size-medium.a-color-base.a-text-normal').text();
+        
+        const itemUrl = card.find('a.a-link-normal.a-text-normal').attr('href');
+        // const priceWhole = card.find('a-price-whole').text();
+        // const priceFraction = card.find('a-price-fraction').text();
+        const price = card.find('span.a-price-whole').text();
+        const currentDate = new Date().toLocaleDateString();
+        //validation
+        if (name.includes(searched) && price != '') {
           let newCard: Card = {
               name: name,
               price: price,
-              url: itemUrl,
+              url: 'amazon.com'+itemUrl,
               currentDate: currentDate
           };
-          cards.push(newCard);
+          temp.push(newCard);  
+        }  
       });
+      //sorts  and then small loop for top 3
+      temp.sort((a: any,b: any) => (a.price) - (b.price));
+      for (let i:number = 0; i < 3; i++) {
+        //no SSDs allowed
+        if (temp[i].name.includes('Crucial')) { 
+          temp.splice(i,1);
+          i--;
+        } else {
+        cards.push(temp[i]);
+        }
+      }
       return cards;
   } catch (error) {
       throw error;
@@ -55,13 +72,17 @@ async function fetchPage(url: string) {
 }
 
 // //might have to change data type here
-function filterCards() {
-  for (var i = 0; i < cards.length; i++){
-      console.log(cards[i].url.includes('3060'||'3070'||'3080'))
-  }
-}
+// function filterCards(name: string) {
+  
+//   for (var i = 0; i < cards.length; i++){
+    
+//       if (cards[i].name.includes(name)) {
+        
+//       }
+//   }
+// }
 
-// //cant find the right data type for 'err', gonna use a node package
+// //cant find the right data type for 'err'
 function printCards() {
     let csv = cards.map(element => {
         return Object.values(element).map(item => `"${item}"`).join(',')
@@ -115,7 +136,7 @@ function printCards() {
   ]);
 
 
-    fetchPage('https://www.amazon.com/s?k=nvidia+3060&crid=2WB9L4PJER3CU&sprefix=nvidia+3060%2Caps%2C66&ref=nb_sb_noss_1')
+    await fetchPage('3060','https://www.amazon.com/s?k=nvidia+3060&crid=2WB9L4PJER3CU&sprefix=nvidia+3060%2Caps%2C66&ref=nb_sb_noss_1')
     
 
   // Click [aria-label="Search"]
@@ -130,7 +151,7 @@ function printCards() {
     page.locator('[aria-label="Search"]').press('Enter')
   ]);
 
-    fetchPage('https://www.amazon.com/s?k=nvidia+3070&crid=E4PRMCDTAGGW&sprefix=nvidia+3070%2Caps%2C64&ref=nb_sb_noss');
+    await fetchPage('3070','https://www.amazon.com/s?k=nvidia+3070&crid=E4PRMCDTAGGW&sprefix=nvidia+3070%2Caps%2C64&ref=nb_sb_noss');
 
   // Click [aria-label="Search"]
   await page.locator('[aria-label="Search"]').click();
@@ -144,7 +165,7 @@ function printCards() {
     page.locator('[aria-label="Search"]').press('Enter')
   ]);
 
-    fetchPage('https://www.amazon.com/s?k=nvidia+3080&crid=1I9LS6LL4GIYM&sprefix=nvidia+3080%2Caps%2C61&ref=nb_sb_noss')
+    await fetchPage('3080','https://www.amazon.com/s?k=nvidia+3080&crid=1I9LS6LL4GIYM&sprefix=nvidia+3080%2Caps%2C61&ref=nb_sb_noss')
     // .then(cards => 
     //   console.log(cards)
     // );
@@ -170,6 +191,6 @@ function printCards() {
 //     const csvExporter = new ExportToCsv(options);
     
 //     csvExporter.generateCsv(cards);
-    filterCards();
+    console.log(cards);
     printCards();
 })();
