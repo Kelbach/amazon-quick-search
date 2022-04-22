@@ -26,7 +26,12 @@ function fetchPage(searched, url) {
         //cheerio boilerplate that I found
         try {
             let temp = [];
-            const response = yield axios.get(url);
+            const response = yield axios.get(url, {
+                headers: {
+                    Accept: "application/json",
+                    "User-Agent": "axios 6.14.15"
+                }
+            });
             const html = response.data;
             const $ = cheerio.load(html);
             //this string in the query selector seems to cover each item
@@ -40,6 +45,7 @@ function fetchPage(searched, url) {
                 // const priceFraction = card.find('a-price-fraction').text();
                 const price = card.find('span.a-price-whole').text();
                 const currentDate = new Date().toLocaleDateString();
+                //validation
                 if (name.includes(searched) && price != '') {
                     let newCard = {
                         name: name,
@@ -50,9 +56,10 @@ function fetchPage(searched, url) {
                     temp.push(newCard);
                 }
             });
-            //sorts for top 3
+            //sorts  and then small loop for top 3
             temp.sort((a, b) => (a.price) - (b.price));
             for (let i = 0; i < 3; i++) {
+                //no SSDs allowed
                 if (temp[i].name.includes('Crucial')) {
                     temp.splice(i, 1);
                     i--;
@@ -113,7 +120,7 @@ function printCards() {
         page.waitForNavigation( /*{ url: 'https://www.amazon.com/s?k=nvidia+3060&crid=2WB9L4PJER3CU&sprefix=nvidia+3060%2Caps%2C66&ref=nb_sb_noss_1' }*/),
         page.locator('[aria-label="Search"]').press('Enter')
     ]);
-    yield fetchPage('3060', 'https://www.amazon.com/s?k=nvidia+3060&crid=2WB9L4PJER3CU&sprefix=nvidia+3060%2Caps%2C66&ref=nb_sb_noss_1');
+    yield fetchPage('3060', 'https://www.amazon.com/s?k=nvidia+3060&crid=1FMSFWKKZUAY&sprefix=nvidia+3060%2Caps%2C69&ref=nb_sb_noss_1');
     // Click [aria-label="Search"]
     yield page.locator('[aria-label="Search"]').click();
     // Fill [aria-label="Search"]
@@ -123,7 +130,7 @@ function printCards() {
         page.waitForNavigation( /*{ url: 'https://www.amazon.com/s?k=nvidia+3070&crid=E4PRMCDTAGGW&sprefix=nvidia+3070%2Caps%2C64&ref=nb_sb_noss' }*/),
         page.locator('[aria-label="Search"]').press('Enter')
     ]);
-    yield fetchPage('3070', 'https://www.amazon.com/s?k=nvidia+3070&crid=E4PRMCDTAGGW&sprefix=nvidia+3070%2Caps%2C64&ref=nb_sb_noss');
+    yield fetchPage('3070', 'https://www.amazon.com/s?k=nvidia+3070&crid=VYS35PCOAW9F&sprefix=nvidia+3070%2Caps%2C63&ref=nb_sb_noss');
     // Click [aria-label="Search"]
     yield page.locator('[aria-label="Search"]').click();
     // Fill [aria-label="Search"]

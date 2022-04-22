@@ -26,8 +26,12 @@ async function fetchPage(searched:string, url: string) {
   //cheerio boilerplate that I found
   try {
       let temp = <Card[]>[];
-
-      const response = await axios.get(url);
+      
+      const response = await axios.get(url, {
+        headers: {
+        Accept: "application/json",
+        "User-Agent": "axios 6.14.15"
+      }});
       const html = response.data;
       const $ = cheerio.load(html);
       
@@ -136,7 +140,7 @@ function printCards() {
   ]);
 
 
-    await fetchPage('3060','https://www.amazon.com/s?k=nvidia+3060&crid=2WB9L4PJER3CU&sprefix=nvidia+3060%2Caps%2C66&ref=nb_sb_noss_1')
+    await fetchPage('3060','https://www.amazon.com/s?k=nvidia+3060&crid=1FMSFWKKZUAY&sprefix=nvidia+3060%2Caps%2C69&ref=nb_sb_noss_1');
     
 
   // Click [aria-label="Search"]
@@ -151,7 +155,7 @@ function printCards() {
     page.locator('[aria-label="Search"]').press('Enter')
   ]);
 
-    await fetchPage('3070','https://www.amazon.com/s?k=nvidia+3070&crid=E4PRMCDTAGGW&sprefix=nvidia+3070%2Caps%2C64&ref=nb_sb_noss');
+    await fetchPage('3070','https://www.amazon.com/s?k=nvidia+3070&crid=VYS35PCOAW9F&sprefix=nvidia+3070%2Caps%2C63&ref=nb_sb_noss');
 
   // Click [aria-label="Search"]
   await page.locator('[aria-label="Search"]').click();
@@ -165,7 +169,7 @@ function printCards() {
     page.locator('[aria-label="Search"]').press('Enter')
   ]);
 
-    await fetchPage('3080','https://www.amazon.com/s?k=nvidia+3080&crid=1I9LS6LL4GIYM&sprefix=nvidia+3080%2Caps%2C61&ref=nb_sb_noss')
+    await fetchPage('3080','https://www.amazon.com/s?k=nvidia+3080&crid=1I9LS6LL4GIYM&sprefix=nvidia+3080%2Caps%2C61&ref=nb_sb_noss');
     // .then(cards => 
     //   console.log(cards)
     // );
